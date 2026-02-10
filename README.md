@@ -31,6 +31,16 @@ You can start editing the page by modifying `app/page.js`. The page auto-updates
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+——————————————————————————
+## Authorization (role-based access control)
+
+```bash
+npm install next-auth
+```
+Account：Admin@yun11261016gmail221.onmicrosoft.com
+         User@yun11261016gmail221.onmicrosoft.com
+Password: Nodeall1000
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
@@ -46,7 +56,3 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 
-——————————————————————————
-npm install next-auth
-Admin@yun11261016gmail221.onmicrosoft.com
-Nodeall1000
