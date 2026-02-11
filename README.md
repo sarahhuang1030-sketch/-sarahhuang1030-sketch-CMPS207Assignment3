@@ -41,7 +41,8 @@ Account：Admin@yun11261016gmail221.onmicrosoft.com
          User@yun11261016gmail221.onmicrosoft.com
 Password: Nodeall1000
 
-## Learn More
+## Azure Key Vault - Sarah
+All sensitive configuration values (database connection strings, storage credentials, and Entra application IDs) are stored in Azure Key Vault and accessed securely at runtime using Azure RBAC and Managed Identity.
 
 To learn more about Next.js, take a look at the following resources:
 

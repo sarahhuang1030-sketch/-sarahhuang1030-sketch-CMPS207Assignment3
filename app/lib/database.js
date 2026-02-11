@@ -9,7 +9,7 @@ const pool = createPool({
   //uri: process.env.MYSQL_PUBLIC_URL,
   host: process.env.DB_HOST || "localhost",
   user: process.env.DB_USER || "root",
-  password: process.env.DB_PASSWORD || "Lsy021126",
+  password: process.env.DB_PASSWORD || "Sarah923*",
   database: process.env.DB_NAME || "oosd_webappdev",
   port: process.env.DB_PORT || 3306,
   waitForConnections: true,
