@@ -66,4 +66,11 @@ jobs:
         with:
           client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_05928DA9221E40F6A605A61773A1C995 }}
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_D5931420DCE941E3AD326A46EF22C79E }}
-          subscription-i
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_A6FD017C2CA9418395E2D03DBDF5F01E }}
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: "assignemnt3webapp"
+          slot-name: "Production"
+          package: node-app.zip
