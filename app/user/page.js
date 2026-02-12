@@ -3,16 +3,19 @@
 import { useSession } from "next-auth/react";
 
 export default function UserPage() {
-    const { data: session } = useSession();
+  const sessionHook = useSession();
+  const session = sessionHook?.data;
 
-    if (!session) {
-        return <p>Please login first.</p>;
-    }
+  if (!session) {
+    return <p>Please login first.</p>;
+  }
 
-    return (
-        <div>
-            <h1>User Page</h1>
-            <p>Your role(s): {session.user.roles.join(", ")}</p>
-        </div>
-    );
+  const roles = session?.user?.roles ?? [];
+
+  return (
+    <div>
+      <h1>User Page</h1>
+      <p>Your role(s): {roles.join(", ") || "none"}</p>
+    </div>
+  );
 }

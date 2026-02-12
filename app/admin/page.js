@@ -1,5 +1,5 @@
 "use client";
-export const dynamic = "force-dynamic"; // ensure this page is always server-rendered (for auth check)
+
 import { useSession } from "next-auth/react";
 
 export default function AdminPage() {
