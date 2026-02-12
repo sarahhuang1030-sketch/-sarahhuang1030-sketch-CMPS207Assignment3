@@ -17,6 +17,7 @@ const pool = createPool({
   queueLimit: 0,
   connectTimeout: 60000,
   dateStrings: true,
+  ssl: { rejectUnauthorized: false },
 });
 
 export default pool;
