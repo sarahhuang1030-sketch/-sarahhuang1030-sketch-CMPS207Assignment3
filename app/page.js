@@ -3,6 +3,8 @@ export const revalidate = 0;
 import Link from "next/link";
 import { getAllUsers } from "./lib/students";
 
+// trying to deploy
+
 export default async function HomePage() {
     const students = await getAllUsers();
 
