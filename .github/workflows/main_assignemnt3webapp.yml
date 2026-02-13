@@ -34,34 +34,31 @@ jobs:
         run: |
           rm -rf deploy node-app.zip
           mkdir -p deploy
-      
+
           # sanity check: standalone exists
           test -f .next/standalone/server.js
-      
+
           # Copy standalone server (puts server.js at root)
           cp -r .next/standalone/* deploy/
-      
+
           # Copy full Next build output (includes BUILD_ID), exclude caches
           mkdir -p deploy/.next
           rsync -a .next/ deploy/.next/ --exclude cache --exclude standalone
-      
+
           # Public assets
           cp -r public deploy/ || true
-      
+
           # package.json (optional but fine)
           cp package.json deploy/
-      
+
           cd deploy
           zip -r ../node-app.zip .
 
-
-      
-      
-            - name: Upload artifact
-              uses: actions/upload-artifact@v4
-              with:
-                name: node-app
-                path: node-app.zip
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: node-app
+          path: node-app.zip
 
   deploy:
     runs-on: ubuntu-latest
@@ -83,15 +80,9 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_D5931420DCE941E3AD326A46EF22C79E }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_A6FD017C2CA9418395E2D03DBDF5F01E }}
 
-      # You can delete this; it only adds delay.
-      # - name: Wait for SCM to be stable
-      #   run: sleep 45
-
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
           app-name: "assignemnt3webapp"
           slot-name: "Production"
           package: node-app.zip
-
-
