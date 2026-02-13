@@ -17,6 +17,10 @@ export async function POST(req) {
     const program = form.get("program");
     const year = form.get("year");
 
+// ====== File field (must match your <input name="...">) ======
+    const file = form.get("profile_picture"); // change to "profile_picture" etc. if your form uses a different name
+
+
     const required = {
       first_name, last_name, phone, email,
       street_address, city, province_state,
@@ -36,6 +40,43 @@ export async function POST(req) {
     );
     if (existing.length > 0) {
       return NextResponse.json({ ok: false, error: "Student with this email already exists" }, { status: 409 });
+    }
+
+
+    // ====== Upload to Azure Blob (if file provided) ======
+    let profile_picture_url = null;
+
+    if (file && typeof file.arrayBuffer === "function" && file.size > 0) {
+      const account = process.env.AZURE_STORAGE_ACCOUNT_NAME;
+      const key = process.env.AZURE_STORAGE_ACCOUNT_KEY;
+      const containerName = process.env.AZURE_STORAGE_CONTAINER; // e.g. "student-images"
+
+      if (!account || !key || !containerName) {
+        return NextResponse.json(
+          {
+            ok: false,
+            error:
+              "Missing Azure Storage env vars: AZURE_STORAGE_ACCOUNT_NAME / AZURE_STORAGE_ACCOUNT_KEY / AZURE_STORAGE_CONTAINER",
+          },
+          { status: 500 }
+        );
+      }
+
+      const conn = `DefaultEndpointsProtocol=https;AccountName=${account};AccountKey=${key};EndpointSuffix=core.windows.net`;
+      const blobService = BlobServiceClient.fromConnectionString(conn);
+      const container = blobService.getContainerClient(containerName);
+
+      const originalName = (file.name || "upload").replace(/\s+/g, "-");
+      const blobName = `${Date.now()}_${crypto.randomUUID()}_${originalName}`;
+
+      const bytes = Buffer.from(await file.arrayBuffer());
+      const blob = container.getBlockBlobClient(blobName);
+
+      await blob.uploadData(bytes, {
+        blobHTTPHeaders: { blobContentType: file.type || "application/octet-stream" },
+      });
+
+      profile_picture_url = blob.url;
     }
 
     await pool.query(
@@ -58,7 +99,10 @@ export async function POST(req) {
       ]
     );
 
-    return NextResponse.json({ ok: true }, { status: 201 });
+    return NextResponse.json(
+      { ok: true, profile_picture_url },
+      { status: 201 }
+    );
   } catch (err) {
     console.error("POST /api/students failed:", err);
     return NextResponse.json(
