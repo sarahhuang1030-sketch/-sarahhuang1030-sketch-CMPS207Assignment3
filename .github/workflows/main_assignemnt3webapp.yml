@@ -33,31 +33,34 @@ jobs:
       - name: Create deployment zip (Next.js standalone)
         run: |
           rm -rf deploy node-app.zip
-          mkdir -p deploy/.next
-
-          # sanity check
+          mkdir -p deploy
+      
+          # sanity check: standalone exists
           test -f .next/standalone/server.js
-
-          # Copy standalone server (puts server.js at root of deploy/)
+      
+          # Copy standalone server (puts server.js at root)
           cp -r .next/standalone/* deploy/
-
-          # Copy Next static assets
-          cp -r .next/static deploy/.next/
-
-          # Copy public (if exists)
+      
+          # Copy the FULL Next build output (includes BUILD_ID)
+          mkdir -p deploy/.next
+          rsync -a .next/ deploy/.next/ --exclude cache
+      
+          # Public assets
           cp -r public deploy/ || true
-
-          # Copy package.json (useful for Azure runtime)
+      
+          # package.json (optional but fine)
           cp package.json deploy/
-
+      
           cd deploy
           zip -r ../node-app.zip .
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: node-app
-          path: node-app.zip
+      
+      
+            - name: Upload artifact
+              uses: actions/upload-artifact@v4
+              with:
+                name: node-app
+                path: node-app.zip
 
   deploy:
     runs-on: ubuntu-latest
@@ -89,3 +92,4 @@ jobs:
           app-name: "assignemnt3webapp"
           slot-name: "Production"
           package: node-app.zip
+
