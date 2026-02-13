@@ -30,15 +30,28 @@ jobs:
           npm ci
           npm run build
 
-      - name: Create deployment zip (exclude node_modules)
+      - name: Create deployment zip (Next.js standalone)
         run: |
-          zip -r node-app.zip . \
-            -x "node_modules/*" \
-            -x ".git/*" \
-            -x ".github/*" \
-            -x ".vercel/*" \
-            -x "**/*.log" \
-            -x "**/.DS_Store"
+          rm -rf deploy node-app.zip
+          mkdir -p deploy/.next
+
+          # sanity check
+          test -f .next/standalone/server.js
+
+          # Copy standalone server (puts server.js at root of deploy/)
+          cp -r .next/standalone/* deploy/
+
+          # Copy Next static assets
+          cp -r .next/static deploy/.next/
+
+          # Copy public (if exists)
+          cp -r public deploy/ || true
+
+          # Copy package.json (useful for Azure runtime)
+          cp package.json deploy/
+
+          cd deploy
+          zip -r ../node-app.zip .
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -66,8 +79,9 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_D5931420DCE941E3AD326A46EF22C79E }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_A6FD017C2CA9418395E2D03DBDF5F01E }}
 
-      - name: Wait for SCM to be stable
-        run: sleep 45
+      # You can delete this; it only adds delay.
+      # - name: Wait for SCM to be stable
+      #   run: sleep 45
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
