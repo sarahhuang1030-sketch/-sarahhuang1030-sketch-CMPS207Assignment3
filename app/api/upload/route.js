@@ -1,3 +1,6 @@
+export const runtime = "nodejs";
+
+
 import { NextResponse } from "next/server";
 import fs from "fs/promises";
 import path from "path";
@@ -21,8 +24,12 @@ export async function POST(req) {
     const safeName = String(file.name || "upload.png").replace(/[^a-zA-Z0-9.\-_]/g, "_");
     const filename = `${Date.now()}_${safeName}`;
     const filepath = path.join(uploadDir, filename);
+console.log("Writing upload to:", filepath);
 
     await fs.writeFile(filepath, buffer);
+    await fs.access(filepath);
+
+console.log("Wrote file OK:", filepath);
 
     // This URL will be publicly accessible
     const url = `/uploads/${filename}`;
