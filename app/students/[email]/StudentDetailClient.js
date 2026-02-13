@@ -116,7 +116,16 @@ export default function StudentDetailClient({ student }) {
     router.refresh();
   }
 
-  const photoSrc = form.profile_picture_url || "/1.jpg";
+ // const photoSrc = form.profile_picture_url || "/1.jpg";
+
+
+const raw = form.profile_picture_url;
+
+const photoSrc =
+  !raw ? "/1.jpg" :
+  raw.startsWith("http") || raw.startsWith("/") ? raw :
+  `/uploads/${raw}`;
+
 
   return (
     <div className="bg-white rounded-xl shadow-lg p-6 max-w-4xl mx-auto mt-10">
@@ -131,7 +140,7 @@ export default function StudentDetailClient({ student }) {
           <div className="relative w-28 h-28 rounded-full overflow-hidden border-2 border-gray-300 bg-gray-100">
             <img
               src={photoSrc}
-              alt="Profile"
+              alt="Student Profile"
               className="w-full h-full object-cover"
             />
           </div>
