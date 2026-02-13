@@ -41,9 +41,9 @@ jobs:
           # Copy standalone server (puts server.js at root)
           cp -r .next/standalone/* deploy/
       
-          # Copy the FULL Next build output (includes BUILD_ID)
+          # Copy full Next build output (includes BUILD_ID), exclude caches
           mkdir -p deploy/.next
-          rsync -a .next/ deploy/.next/ --exclude cache
+          rsync -a .next/ deploy/.next/ --exclude cache --exclude standalone
       
           # Public assets
           cp -r public deploy/ || true
@@ -53,6 +53,7 @@ jobs:
       
           cd deploy
           zip -r ../node-app.zip .
+
 
       
       
@@ -92,4 +93,5 @@ jobs:
           app-name: "assignemnt3webapp"
           slot-name: "Production"
           package: node-app.zip
+
 
