@@ -113,44 +113,58 @@ export default function UsersPage({ students }) {
 
   //   return publicUrl;
   // }
+async function handleSubmit(e) {
+  e.preventDefault();
+  setUploadError(null);
 
-  async function handleSubmit(e) {
-    e.preventDefault();
-    setUploadError(null);
+  try {
+    setUploading(true);
 
-    try {
-      setUploading(true);
+    const formEl = e.currentTarget;
+    const formData = new FormData(formEl);
 
-      const formData = new FormData(e.currentTarget);
+    // 1) Upload profile picture if provided
+    const file = formData.get("profile_picture");
+    let url = "";
 
-      // if (profilePic) {
-      //   const url = await uploadToAzureBlob(profilePic);
-      //   setProfilePicUrl(url);
-      //   formData.set("profile_picture_url", url);
-      // }
+    if (file && typeof file.arrayBuffer === "function" && file.size > 0) {
+      const uploadFd = new FormData();
+      uploadFd.append("file", file); // /api/upload expects "file"
 
-      console.log("submitting...");
+      const upRes = await fetch("/api/upload", { method: "POST", body: uploadFd });
+      const upJson = await upRes.json();
 
-      const res = await fetch("/api/students", {
-        method: "POST",
-        body: formData,
-      });
-
-      console.log("Student API status:", res.status);
-
-      if (!res.ok) {
-        const msg = await res.text();
-        throw new Error(msg || "Saving student failed");
+      if (!upRes.ok || !upJson.ok) {
+        throw new Error(upJson?.error || "Upload failed");
       }
 
-      router.push("/");
-      router.refresh();
-    } catch (err) {
-      setUploadError(err.message || "Something went wrong");
-    } finally {
-      setUploading(false);
+      url = upJson.url || "";
+      setProfilePicUrl(url);
     }
+
+    // 2) Submit student data (URL only, no raw file)
+    formData.delete("profile_picture");
+    formData.set("profile_picture_url", url); // matches your hidden input + /api/students
+
+    console.log("submitting...");
+    const res = await fetch("/api/students", { method: "POST", body: formData });
+    const json = await res.json().catch(() => null);
+
+    console.log("Student API status:", res.status);
+
+    if (!res.ok || !json?.ok) {
+      throw new Error(json?.error || "Saving student failed");
+    }
+
+    router.push("/");
+    router.refresh();
+  } catch (err) {
+    setUploadError(err.message || "Something went wrong");
+  } finally {
+    setUploading(false);
   }
+}
+
 
   const labelClass = "block text-sm font-medium text-slate-700";
   const inputClass =

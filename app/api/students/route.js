@@ -1,5 +1,7 @@
+export const runtime = "nodejs";
+
 import { NextResponse } from "next/server";
-import pool from "@/app/lib/database"; // adjust if your path differs
+import pool from "@/app/lib/database";
 
 export async function POST(req) {
   try {
@@ -17,73 +19,48 @@ export async function POST(req) {
     const program = form.get("program");
     const year = form.get("year");
 
-// ====== File field (must match your <input name="...">) ======
-    const file = form.get("profile_picture"); // change to "profile_picture" etc. if your form uses a different name
-
+    // ✅ comes from /api/upload response
+    const profile_picture_url = form.get("profile_picture_url");
 
     const required = {
-      first_name, last_name, phone, email,
-      street_address, city, province_state,
-      country, postal_code, program, year,
+      first_name,
+      last_name,
+      phone,
+      email,
+      street_address,
+      city,
+      province_state,
+      country,
+      postal_code,
+      program,
+      year,
     };
 
     for (const [k, v] of Object.entries(required)) {
       if (!v || String(v).trim() === "") {
-        return NextResponse.json({ ok: false, error: `Missing required field: ${k}` }, { status: 400 });
+        return NextResponse.json(
+          { ok: false, error: `Missing required field: ${k}` },
+          { status: 400 }
+        );
       }
     }
 
-    // Optional: prevent duplicate email (recommended)
     const [existing] = await pool.query(
       "SELECT id FROM students WHERE email = ? LIMIT 1",
       [email]
     );
     if (existing.length > 0) {
-      return NextResponse.json({ ok: false, error: "Student with this email already exists" }, { status: 409 });
-    }
-
-
-    // ====== Upload to Azure Blob (if file provided) ======
-    let profile_picture_url = null;
-
-    if (file && typeof file.arrayBuffer === "function" && file.size > 0) {
-      const account = process.env.AZURE_STORAGE_ACCOUNT_NAME;
-      const key = process.env.AZURE_STORAGE_ACCOUNT_KEY;
-      const containerName = process.env.AZURE_STORAGE_CONTAINER; // e.g. "student-images"
-
-      if (!account || !key || !containerName) {
-        return NextResponse.json(
-          {
-            ok: false,
-            error:
-              "Missing Azure Storage env vars: AZURE_STORAGE_ACCOUNT_NAME / AZURE_STORAGE_ACCOUNT_KEY / AZURE_STORAGE_CONTAINER",
-          },
-          { status: 500 }
-        );
-      }
-
-      const conn = `DefaultEndpointsProtocol=https;AccountName=${account};AccountKey=${key};EndpointSuffix=core.windows.net`;
-      const blobService = BlobServiceClient.fromConnectionString(conn);
-      const container = blobService.getContainerClient(containerName);
-
-      const originalName = (file.name || "upload").replace(/\s+/g, "-");
-      const blobName = `${Date.now()}_${crypto.randomUUID()}_${originalName}`;
-
-      const bytes = Buffer.from(await file.arrayBuffer());
-      const blob = container.getBlockBlobClient(blobName);
-
-      await blob.uploadData(bytes, {
-        blobHTTPHeaders: { blobContentType: file.type || "application/octet-stream" },
-      });
-
-      profile_picture_url = blob.url;
+      return NextResponse.json(
+        { ok: false, error: "Student with this email already exists" },
+        { status: 409 }
+      );
     }
 
     await pool.query(
       `INSERT INTO students
-        (first_name, last_name, phone, email, street_address, city, province_state, country, postal_code, program, year)
-       VALUES
-        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      (first_name, last_name, phone, email, street_address, city, province_state, country, postal_code, program, year, profile_picture_url)
+      VALUES
+      (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         first_name,
         last_name,
@@ -96,13 +73,13 @@ export async function POST(req) {
         postal_code,
         program,
         year,
+        profile_picture_url && String(profile_picture_url).trim() !== ""
+          ? String(profile_picture_url)
+          : null,
       ]
     );
 
-    return NextResponse.json(
-      { ok: true, profile_picture_url },
-      { status: 201 }
-    );
+    return NextResponse.json({ ok: true }, { status: 201 });
   } catch (err) {
     console.error("POST /api/students failed:", err);
     return NextResponse.json(
