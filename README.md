@@ -33,6 +33,7 @@ This project uses [`next/font`](https://nextjs.org/docs/app/building-your-applic
 
 ——————————————————————————
 ## Authorization (role-based access control)
+Entra ID (Authentication & Authorization)
 
 ```bash
 npm install next-auth
@@ -41,19 +42,21 @@ Account：Admin@yun11261016gmail221.onmicrosoft.com
          User@yun11261016gmail221.onmicrosoft.com
 Password: Nodeall1000
 
-## Azure Key Vault - Sarah
+## Azure Key Vault 
 All sensitive configuration values (database connection strings, storage credentials, and Entra application IDs) are stored in Azure Key Vault and accessed securely at runtime using Azure RBAC and Managed Identity.
 
-To learn more about Next.js, take a look at the following resources:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
+👤 Person 2 — Azure SQL Database
+Owns: Data layer
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+👤 Person 3 — Azure Key Vault
+Owns: Secrets management
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+👤 Person 4 — Azure Web App & Deployment
+Owns: Hosting + runtime
 
+
+👤 Person 5 — Monitoring, Logs & Alerts
+Owns: Observability
